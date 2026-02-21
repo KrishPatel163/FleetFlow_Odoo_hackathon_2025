@@ -1,7 +1,11 @@
 import { Truck } from 'lucide-react';
 import { useState } from 'react';
 import { useNavigate } from 'react-router';
-import { toast } from 'sonner';
+// REMOVE: import { supabase, apiUrl } from '../lib/supabase';
+// ADD: Define your backend URL (usually http://localhost:8000/api/v1/auth)
+const API_AUTH_URL = "http://localhost:8000/api/v1/auth"; 
+
+import { getAllRoles } from '../lib/roles';
 import { Button } from '../components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/card';
 import { Input } from '../components/ui/input';
@@ -15,11 +19,9 @@ export function Login() {
   const [isLoading, setIsLoading] = useState(false);
   const [activeTab, setActiveTab] = useState('login');
 
-  // Login state
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
 
-  // Signup state
   const [signupEmail, setSignupEmail] = useState('');
   const [signupPassword, setSignupPassword] = useState('');
   const [signupName, setSignupName] = useState('');
@@ -27,60 +29,48 @@ export function Login() {
 
   const roles = getAllRoles();
 
-  // ================= LOGIN =================
+  // LOGIN HANDLER
   const handleLogin = async (e) => {
     e.preventDefault();
     setIsLoading(true);
 
     try {
-      const response = await fetch('http://localhost:8000/api/v1/auth/login', {
+      const response = await fetch(`${API_AUTH_URL}/login`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          email,
-          password,
-        }),
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password }),
       });
 
-      const responseData = await response.json();
+      const result = await response.json();
 
-      if (!response.ok || !responseData.success) {
-        throw new Error(responseData.message || 'Login failed');
+      if (!response.ok) {
+        throw new Error(result.message || 'Login failed');
       }
 
-      // ✅ NEW BACKEND STRUCTURE
-      const token = responseData.data.token;
-      const user = responseData.data.user;
-
-      // Store token + user
-      localStorage.setItem('token', token);
-      localStorage.setItem('user', JSON.stringify(user));
-
-      toast.success(`Welcome back, ${user.fullName}!`);
+      // SUCCESS: Store the token and user data
+      localStorage.setItem('token', result.data.token);
+      localStorage.setItem('user', JSON.stringify(result.data.user));
+      
+      toast.success('Login successful!');
       navigate('/app');
-
     } catch (error) {
-      console.error('Login error:', error);
-      toast.error(error.message || 'An error occurred during login');
+      toast.error(error.message);
     } finally {
       setIsLoading(false);
     }
   };
 
-  // ================= SIGNUP =================
+  // SIGNUP HANDLER
   const handleSignup = async (e) => {
     e.preventDefault();
     setIsLoading(true);
 
     try {
-      const response = await fetch('http://localhost:8000/api/v1/auth/signup', {
+      const response = await fetch(`${API_AUTH_URL}/signup`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
+          fullName: signupName, // Match backend field name
           fullName: signupName,
           email: signupEmail,
           password: signupPassword,
@@ -88,10 +78,10 @@ export function Login() {
         }),
       });
 
-      const responseData = await response.json();
+      const result = await response.json();
 
-      if (!response.ok || !responseData.success) {
-        throw new Error(responseData.message || 'Signup failed');
+      if (!response.ok) {
+        throw new Error(result.message || 'Signup failed');
       }
 
       toast.success(responseData.message);
@@ -101,8 +91,7 @@ export function Login() {
       setEmail(signupEmail);
 
     } catch (error) {
-      console.error('Signup error:', error);
-      toast.error(error.message || 'An error occurred during signup');
+      toast.error(error.message);
     } finally {
       setIsLoading(false);
     }
