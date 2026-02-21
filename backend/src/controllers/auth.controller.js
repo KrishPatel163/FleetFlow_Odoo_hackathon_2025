@@ -1,6 +1,6 @@
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
-import { OfficerModel } from "../models/officer.model.js";
+import { OfficerModel } from "../models/officers.model.js";
 import ResponseHandler from "../utils/ResponseHandler.js";
 
 // SIGNUP: Create new Officer
