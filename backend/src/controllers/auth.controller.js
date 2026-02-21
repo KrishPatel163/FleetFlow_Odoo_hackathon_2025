@@ -1,4 +1,4 @@
-import bcrypt from "bcryptjs";
+import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import { OfficerModel } from "../models/officers.model.js";
 import ResponseHandler from "../utils/ResponseHandler.js";
@@ -8,19 +8,23 @@ export const signup = async (req, res, next) => {
   try {
     const { fullName, email, password, role } = req.body;
 
-    // Simple validation (can also use Zod here)
     if (!fullName || !email || !password || !role) {
       const error = new Error("All fields are required");
       error.status = 400;
       return next(error);
     }
 
-    // Hash password
+    // HASHING ONCE RIGHT HERE
     const salt = await bcrypt.genSalt(10);
     const passwordHash = await bcrypt.hash(password, salt);
 
-    // Save to DB
-    const newOfficer = await OfficerModel.create(fullName, email, passwordHash, role);
+    // Pass the already-hashed password to the model
+    const newOfficer = await OfficerModel.create(
+      fullName, 
+      email, 
+      passwordHash, 
+      role
+    );
 
     return ResponseHandler.SuccessResponse(
       res,
@@ -29,7 +33,7 @@ export const signup = async (req, res, next) => {
       201
     );
   } catch (err) {
-    next(err); // Handled by your ErrorMiddleware (including duplicate email errors)
+    next(err);
   }
 };
 
@@ -39,6 +43,7 @@ export const login = async (req, res, next) => {
     const { email, password } = req.body;
 
     const officer = await OfficerModel.findByEmail(email);
+    console.log(officer.id);
     if (!officer) {
       const error = new Error("Invalid email or password");
       error.status = 401;
@@ -60,15 +65,20 @@ export const login = async (req, res, next) => {
       { expiresIn: "8h" }
     );
 
-    return ResponseHandler.SuccessResponse(
-      res,
-      "Login successful",
-      {
-        token,
-        user: { name: officer.full_name, role: officer.role }
-      }
-    );
-  } catch (err) {
-    next(err);
-  }
+    // 4. Send clean response
+        return ResponseHandler.SuccessResponse(
+            res,
+            "Login successful",
+            {
+                token,
+                user: {
+                    id: officer.id,
+                    fullName: officer.full_name,
+                    role: officer.role
+                }
+            }
+        );
+    } catch (err) {
+        next(err);
+    }
 };
