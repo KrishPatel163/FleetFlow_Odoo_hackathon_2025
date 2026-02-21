@@ -1,4 +1,5 @@
-import { useEffect, useState } from 'react';
+import { Truck } from 'lucide-react';
+import { useState } from 'react';
 import { useNavigate } from 'react-router';
 // REMOVE: import { supabase, apiUrl } from '../lib/supabase';
 // ADD: Define your backend URL (usually http://localhost:8000/api/v1/auth)
@@ -6,13 +7,12 @@ const API_AUTH_URL = "http://localhost:8000/api/v1/auth";
 
 import { getAllRoles } from '../lib/roles';
 import { Button } from '../components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/card';
 import { Input } from '../components/ui/input';
 import { Label } from '../components/ui/label';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/card';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '../components/ui/tabs';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../components/ui/select';
-import { toast } from 'sonner';
-import { Truck } from 'lucide-react';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '../components/ui/tabs';
+import { getAllRoles } from '../lib/roles';
 
 export function Login() {
   const navigate = useNavigate();
@@ -71,6 +71,7 @@ export function Login() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           fullName: signupName, // Match backend field name
+          fullName: signupName,
           email: signupEmail,
           password: signupPassword,
           role: signupRole,
@@ -83,9 +84,12 @@ export function Login() {
         throw new Error(result.message || 'Signup failed');
       }
 
-      toast.success('Account created successfully! Please log in.');
+      toast.success(responseData.message);
+
+      // Switch to login tab
       setActiveTab('login');
       setEmail(signupEmail);
+
     } catch (error) {
       toast.error(error.message);
     } finally {
@@ -102,9 +106,14 @@ export function Login() {
               <Truck className="w-8 h-8 text-white" />
             </div>
           </div>
-          <CardTitle className="text-2xl font-bold">Fleet Management System</CardTitle>
-          <CardDescription>Secure access for fleet operations</CardDescription>
+          <CardTitle className="text-2xl font-bold">
+            Fleet Management System
+          </CardTitle>
+          <CardDescription>
+            Secure access for fleet operations
+          </CardDescription>
         </CardHeader>
+
         <CardContent>
           <Tabs value={activeTab} onValueChange={setActiveTab}>
             <TabsList className="grid w-full grid-cols-2 mb-6">
@@ -112,12 +121,12 @@ export function Login() {
               <TabsTrigger value="signup">Sign Up</TabsTrigger>
             </TabsList>
 
+            {/* LOGIN TAB */}
             <TabsContent value="login">
               <form onSubmit={handleLogin} className="space-y-4">
                 <div className="space-y-2">
-                  <Label htmlFor="email">Email</Label>
+                  <Label>Email</Label>
                   <Input
-                    id="email"
                     type="email"
                     placeholder="user@example.com"
                     value={email}
@@ -125,37 +134,29 @@ export function Login() {
                     required
                   />
                 </div>
+
                 <div className="space-y-2">
-                  <div className="flex items-center justify-between">
-                    <Label htmlFor="password">Password</Label>
-                    <button
-                      type="button"
-                      className="text-sm text-blue-600 hover:underline"
-                      onClick={() => toast.info('Please contact your administrator')}
-                    >
-                      Forgot Password?
-                    </button>
-                  </div>
+                  <Label>Password</Label>
                   <Input
-                    id="password"
                     type="password"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     required
                   />
                 </div>
+
                 <Button type="submit" className="w-full" disabled={isLoading}>
                   {isLoading ? 'Logging in...' : 'Login'}
                 </Button>
               </form>
             </TabsContent>
 
+            {/* SIGNUP TAB */}
             <TabsContent value="signup">
               <form onSubmit={handleSignup} className="space-y-4">
                 <div className="space-y-2">
-                  <Label htmlFor="signup-name">Full Name</Label>
+                  <Label>Full Name</Label>
                   <Input
-                    id="signup-name"
                     type="text"
                     placeholder="John Doe"
                     value={signupName}
@@ -163,10 +164,10 @@ export function Login() {
                     required
                   />
                 </div>
+
                 <div className="space-y-2">
-                  <Label htmlFor="signup-email">Email</Label>
+                  <Label>Email</Label>
                   <Input
-                    id="signup-email"
                     type="email"
                     placeholder="user@example.com"
                     value={signupEmail}
@@ -174,10 +175,10 @@ export function Login() {
                     required
                   />
                 </div>
+
                 <div className="space-y-2">
-                  <Label htmlFor="signup-password">Password</Label>
+                  <Label>Password</Label>
                   <Input
-                    id="signup-password"
                     type="password"
                     value={signupPassword}
                     onChange={(e) => setSignupPassword(e.target.value)}
@@ -185,24 +186,29 @@ export function Login() {
                     minLength={6}
                   />
                 </div>
+
                 <div className="space-y-2">
-                  <Label htmlFor="role">Role</Label>
+                  <Label>Role</Label>
                   <Select value={signupRole} onValueChange={setSignupRole}>
-                    <SelectTrigger id="role">
+                    <SelectTrigger>
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      {roles.map(role => (
-                        <SelectItem key={role.value} value={role.value}>{role.label}</SelectItem>
+                      {roles.map((role) => (
+                        <SelectItem key={role.value} value={role.value}>
+                          {role.label}
+                        </SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
                 </div>
+
                 <Button type="submit" className="w-full" disabled={isLoading}>
                   {isLoading ? 'Creating account...' : 'Create Account'}
                 </Button>
               </form>
             </TabsContent>
+
           </Tabs>
         </CardContent>
       </Card>
