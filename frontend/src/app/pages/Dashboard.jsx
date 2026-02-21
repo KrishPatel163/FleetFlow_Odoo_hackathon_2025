@@ -20,6 +20,12 @@ export function Dashboard() {
   const [isLoading, setIsLoading] = useState(true);
   const [trips, setTrips] = useState([]);
 
+  const [searchQuery, setSearchQuery] = useState('');
+  const [sortBy, setSortBy] = useState('name');
+  const [vehicleTypeFilter, setVehicleTypeFilter] = useState('all');
+  const [statusFilter, setStatusFilter] = useState('all');
+  const [regionFilter, setRegionFilter] = useState('all');
+
   useEffect(() => {
     fetchDashboardData();
     fetchTripsData();
@@ -31,7 +37,7 @@ export function Dashboard() {
       const token = localStorage.getItem('token');
 
       if (!token) {
-        toast.error('Unauthorized. Please login again.');
+        toast.error('Session expired. Please login again.');
         navigate('/');
         return;
       }
@@ -97,15 +103,18 @@ export function Dashboard() {
     );
   }
 
+  const availableVehicles =
+    kpis.totalVehicles - kpis.assignedVehicles - kpis.maintenanceAlerts;
+
   return (
     <div className="space-y-6">
 
       <div>
         <h1 className="text-3xl font-bold text-gray-900">Command Center</h1>
-        <p className="text-gray-500 mt-1">High-level fleet oversight</p>
+        <p className="text-gray-500 mt-1">High-level fleet oversight at a glance</p>
       </div>
 
-      {/* KPI Cards */}
+      {/* KPI CARDS */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         <Card>
           <CardContent className="pt-6">
@@ -136,7 +145,7 @@ export function Dashboard() {
         </Card>
       </div>
 
-      {/* Fleet Overview */}
+      {/* FLEET OVERVIEW */}
       <Card>
         <CardHeader>
           <CardTitle>Fleet Overview</CardTitle>
@@ -146,17 +155,14 @@ export function Dashboard() {
             <p>Total Vehicles</p>
             <p className="text-2xl font-bold">{kpis.totalVehicles}</p>
           </div>
-
           <div className="text-center">
-            <p>Assigned</p>
-            <p className="text-2xl font-bold">{kpis.assignedVehicles}</p>
+            <p>Available</p>
+            <p className="text-2xl font-bold">{availableVehicles}</p>
           </div>
-
           <div className="text-center">
             <p>On Trip</p>
             <p className="text-2xl font-bold">{kpis.activeFleet}</p>
           </div>
-
           <div className="text-center">
             <p>In Maintenance</p>
             <p className="text-2xl font-bold">{kpis.maintenanceAlerts}</p>
@@ -164,7 +170,7 @@ export function Dashboard() {
         </CardContent>
       </Card>
 
-      {/* Recent Trips */}
+      {/* RECENT TRIPS */}
       <Card>
         <CardHeader>
           <CardTitle>Recent Trips</CardTitle>
@@ -179,7 +185,6 @@ export function Dashboard() {
                 <TableHead>Status</TableHead>
               </TableRow>
             </TableHeader>
-
             <TableBody>
               {trips.length === 0 ? (
                 <TableRow>
@@ -194,9 +199,7 @@ export function Dashboard() {
                     <TableCell>{trip.vehicleName || 'N/A'}</TableCell>
                     <TableCell>{trip.driverName || 'N/A'}</TableCell>
                     <TableCell>
-                      <Badge>
-                        {trip.status}
-                      </Badge>
+                      <Badge>{trip.status}</Badge>
                     </TableCell>
                   </TableRow>
                 ))
