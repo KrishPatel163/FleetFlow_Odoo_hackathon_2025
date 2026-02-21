@@ -1,6 +1,9 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router';
-import { supabase, apiUrl } from '../lib/supabase';
+// REMOVE: import { supabase, apiUrl } from '../lib/supabase';
+// ADD: Define your backend URL (usually http://localhost:8000/api/v1/auth)
+const API_AUTH_URL = "http://localhost:8000/api/v1/auth"; 
+
 import { getAllRoles } from '../lib/roles';
 import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
@@ -16,77 +19,75 @@ export function Login() {
   const [isLoading, setIsLoading] = useState(false);
   const [activeTab, setActiveTab] = useState('login');
 
-  // Login state
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
 
-  // Signup state
   const [signupEmail, setSignupEmail] = useState('');
   const [signupPassword, setSignupPassword] = useState('');
   const [signupName, setSignupName] = useState('');
   const [signupRole, setSignupRole] = useState('fleet_manager');
 
-  // Get all available roles
   const roles = getAllRoles();
 
+  // LOGIN HANDLER
   const handleLogin = async (e) => {
     e.preventDefault();
     setIsLoading(true);
 
     try {
-      const { data, error } = await supabase.auth.signInWithPassword({
-        email,
-        password,
+      const response = await fetch(`${API_AUTH_URL}/login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password }),
       });
 
-      if (error) {
-        toast.error(`Login failed: ${error.message}`);
-        return;
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(result.message || 'Login failed');
       }
 
-      if (data.session) {
-        toast.success('Login successful!');
-        navigate('/app');
-      }
+      // SUCCESS: Store the token and user data
+      localStorage.setItem('token', result.data.token);
+      localStorage.setItem('user', JSON.stringify(result.data.user));
+      
+      toast.success('Login successful!');
+      navigate('/app');
     } catch (error) {
-      console.error('Login error:', error);
-      toast.error('An error occurred during login');
+      toast.error(error.message);
     } finally {
       setIsLoading(false);
     }
   };
 
+  // SIGNUP HANDLER
   const handleSignup = async (e) => {
     e.preventDefault();
     setIsLoading(true);
 
     try {
-      const response = await fetch(`${apiUrl}/signup`, {
+      const response = await fetch(`${API_AUTH_URL}/signup`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
+          fullName: signupName, // Match backend field name
           email: signupEmail,
           password: signupPassword,
-          name: signupName,
           role: signupRole,
         }),
       });
 
-      const data = await response.json();
+      const result = await response.json();
 
       if (!response.ok) {
-        toast.error(`Signup failed: ${data.error}`);
-        return;
+        throw new Error(result.message || 'Signup failed');
       }
 
       toast.success('Account created successfully! Please log in.');
       setActiveTab('login');
       setEmail(signupEmail);
     } catch (error) {
-      console.error('Signup error:', error);
-      toast.error('An error occurred during signup');
+      toast.error(error.message);
     } finally {
       setIsLoading(false);
     }
