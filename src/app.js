@@ -7,8 +7,8 @@ app.use(cors());
 app.use(express.json({ limit: "16kb" }));
 app.use(express.urlencoded({ extended: true, limit: "16kb" }));
 
-// Route Imports
-// import vehicleRouter from "./routes/vehicle.routes.js";
-// app.use("/api/v1/vehicles", vehicleRouter);
+// Route imports
+import authRouter from "./routes/auth.routes.js";
+app.use("/api/v1/auth", authRouter);
 
 export default app;
