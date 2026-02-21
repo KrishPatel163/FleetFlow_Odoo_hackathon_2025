@@ -1,0 +1,42 @@
+{
+  "name": "fleetflow-backend",
+  "version": "1.0.0",
+  "description": "This is the backend infrastructure for the backend of the Odoo hackathon submission",
+  "keywords": [
+    "nodejs",
+    "express",
+    "zod",
+    "bcrypt",
+    "odoo",
+    "hackathon",
+    "postgresql",
+    "full-stack"
+  ],
+  "homepage": "https://github.com/KrishPatel163/FleetFlow_Odoo_hackathon_2025#readme",
+  "bugs": {
+    "url": "https://github.com/KrishPatel163/FleetFlow_Odoo_hackathon_2025/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/KrishPatel163/FleetFlow_Odoo_hackathon_2025.git"
+  },
+  "license": "ISC",
+  "author": "",
+  "type": "module",
+  "main": "index.js",
+  "scripts": {
+    "dev": "nodemon index.js"
+  },
+  "dependencies": {
+    "bcrypt": "^6.0.0",
+    "cors": "^2.8.6",
+    "dotenv": "^17.3.1",
+    "express": "^5.2.1",
+    "jsonwebtoken": "^9.0.3",
+    "pg": "^8.18.0",
+    "zod": "^4.3.6"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.14"
+  }
+}
